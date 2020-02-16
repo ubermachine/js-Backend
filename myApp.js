@@ -3,14 +3,39 @@ var express = require('express');
 var app = express();
 let absolutePath = __dirname + "/views/index.html";
 app.use("/", express.static(__dirname + "/public"));
+app.use(function middleware(req, res, next) {
 
+console.log(req.method ,req.path ," - " , req.ip)
+  next();
+});
 // --> 7)  Mount the Logger middleware here
-app.get("/", (req, res) => {
+app.get("/", (req, res) => { 
   res.sendFile(absolutePath);
 });
 // --> 11)  Mount the body-parser middleware  here
+let response =""
 
+app.get("/json", (req, res) => {
+ if(process.env.MESSAGE_STYLE==="uppercase"){
+   response ="Hello json".toUpperCase();
+ }else {
+  response = "Hello json";
+}
 
+  res.json({"message":response});
+});
+app.get(
+  "/now",
+  (req, res, next) => {
+    req.time = new Date().toString();
+    next();
+  },
+  (req, res) => {
+    res.send({
+      time: req.time
+    });
+  }
+);
 /** 1) Meet the node console. */
 
 
@@ -37,6 +62,12 @@ app.get("/", (req, res) => {
 
 
 /** 9)  Get input from client - Route parameters */
+app.get("/:word/echo", (req, res) => {
+  const { word } = req.params;
+  res.json({
+    echo: word
+  });
+});
 
 
 /** 10) Get input from client - Query parameters */
